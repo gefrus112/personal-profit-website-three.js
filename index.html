@@ -1,0 +1,1416 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CubeComet | gefrus112 & offfactory | Black Hole & Hyperspace 3D Portfolio</title>
+    
+    <!-- Custom Realistic Black Hole Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3CradialGradient id='g' cx='50%25' cy='50%25' r='50%25'%3E%3Stop offset='32%25' stop-color='%23000'/%3E%3Stop offset='40%25' stop-color='%23fff'/%3E%3Stop offset='52%25' stop-color='%23ff8800'/%3E%3Stop offset='75%25' stop-color='%23ff2200' stop-opacity='0.5'/%3E%3Stop offset='100%25' stop-color='%23000' stop-opacity='0'/%3E%3C/radialGradient%3E%3ClinearGradient id='d' x1='0%25' y1='0%25' x2='100%25' y2='0%25'%3E%3Stop offset='0%25' stop-color='%23ff4400' stop-opacity='0'/%3E%3Stop offset='25%25' stop-color='%23ffbb00'/%3E%3Stop offset='50%25' stop-color='%23ffffff'/%3E%3Stop offset='75%25' stop-color='%23ffbb00'/%3E%3Stop offset='100%25' stop-color='%23ff4400' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='48' fill='url(%23g)'/%3E%3Cellipse cx='50' cy='50' rx='48' ry='11' fill='url(%23d)' transform='rotate(-22 50 50)'/%3E%3Ccircle cx='50' cy='50' r='17' fill='%23000' stroke='%23ffeeaa' stroke-width='1.5'/%3E%3C/svg%3E">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #ff9d00;
+            --secondary: #00f3ff;
+            --sun-gold: #ffcc00;
+            --bg-glass: rgba(6, 8, 16, 0.68);
+            --border-glass: rgba(255, 157, 0, 0.35);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+            cursor: none; /* Custom Gravity Cursor */
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: #ffffff;
+            background-color: #010103;
+            overflow-x: hidden;
+        }
+
+        /* 3D WebGL Canvas */
+        canvas#bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -2;
+        }
+
+        /* 2D Gravity Mouse Overlay Canvas */
+        canvas#cursor-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        /* LOADING / ESCAPE SINGULARITY OVERLAY */
+        #loading-screen {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(10, 5, 2, 0.55) 0%, #010103 85%);
+            backdrop-filter: blur(8px);
+            z-index: 5000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            transition: opacity 0.9s ease, visibility 0.9s ease;
+        }
+
+        #loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .warning-box {
+            border: 1px solid var(--primary);
+            background: rgba(255, 120, 0, 0.1);
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-family: 'Orbitron', sans-serif;
+            color: var(--primary);
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            animation: pulseGlow 1.5s infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            from { box-shadow: 0 0 10px rgba(255, 157, 0, 0.2); }
+            to { box-shadow: 0 0 25px rgba(255, 157, 0, 0.8); }
+        }
+
+        #loading-screen h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.2rem;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #fff, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        #loading-screen p {
+            color: #ccc;
+            max-width: 520px;
+            margin-bottom: 30px;
+            font-size: 1rem;
+        }
+
+        .enter-btn {
+            padding: 16px 40px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #000;
+            background: linear-gradient(90deg, var(--primary), #ffeeaa, var(--secondary));
+            border: none;
+            border-radius: 40px;
+            box-shadow: 0 0 30px rgba(255, 157, 0, 0.7);
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .enter-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 50px rgba(0, 243, 255, 1);
+        }
+
+        /* SPACE FLIGHT TELEMETRY HUD */
+        .space-hud {
+            position: fixed;
+            bottom: 25px;
+            left: 30px;
+            z-index: 90;
+            background: rgba(5, 7, 15, 0.75);
+            border-left: 3px solid var(--primary);
+            padding: 12px 18px;
+            border-radius: 0 10px 10px 0;
+            backdrop-filter: blur(8px);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            pointer-events: none;
+        }
+
+        .hud-sector {
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+            transition: color 0.3s;
+        }
+
+        .hud-sub {
+            color: #aaa;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #020205; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(var(--primary), var(--secondary)); border-radius: 4px; }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 16px 45px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: rgba(2, 2, 6, 0.75);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #fff, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 22px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+            text-shadow: 0 0 12px var(--primary);
+        }
+
+        /* Music Synthesizer Button */
+        .music-btn {
+            background: rgba(255, 157, 0, 0.15);
+            border: 1px solid var(--primary);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.78rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+
+        .music-btn:hover {
+            background: var(--primary);
+            color: #000;
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        .eq-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 12px;
+        }
+
+        .eq-bar {
+            width: 3px;
+            background: var(--secondary);
+            height: 4px;
+            transition: 0.2s;
+        }
+
+        .music-playing .eq-bar:nth-child(1) { animation: eq 0.5s infinite alternate; }
+        .music-playing .eq-bar:nth-child(2) { animation: eq 0.35s infinite alternate 0.1s; }
+        .music-playing .eq-bar:nth-child(3) { animation: eq 0.6s infinite alternate 0.2s; }
+
+        @keyframes eq {
+            0% { height: 3px; }
+            100% { height: 12px; }
+        }
+
+        /* Main Layout */
+        main {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 110px 0;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Hero Section */
+        .hero-badge {
+            background: rgba(255, 157, 0, 0.15);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.82rem;
+            margin-bottom: 15px;
+            width: fit-content;
+            box-shadow: 0 0 15px rgba(255, 157, 0, 0.3);
+        }
+
+        .hero h1 {
+            font-size: 4.2rem;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            text-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
+        }
+
+        .highlight-orange {
+            background: linear-gradient(90deg, #fff3cc, var(--primary), #ff4500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .highlight-cyan {
+            color: var(--secondary);
+            text-shadow: 0 0 20px rgba(0, 243, 255, 0.6);
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            max-width: 580px;
+            margin-bottom: 30px;
+            color: #e0e0e0;
+            text-shadow: 0 2px 12px #000;
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 26px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 0.88rem;
+            text-decoration: none;
+            color: #fff;
+            background: linear-gradient(45deg, #ff5500, var(--primary));
+            border-radius: 30px;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border: none;
+            box-shadow: 0 0 20px rgba(255, 157, 0, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 157, 0, 0.9);
+        }
+
+        .btn-cyber {
+            background: linear-gradient(45deg, #0066ff, var(--secondary));
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.35);
+            color: #000;
+        }
+
+        .btn-cyber:hover {
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.9);
+        }
+
+        .btn-yt {
+            background: rgba(15, 15, 22, 0.85);
+            border: 2px solid #ff0033;
+            box-shadow: 0 0 15px rgba(255, 0, 51, 0.35);
+        }
+
+        .btn-yt:hover {
+            background: #ff0033;
+            box-shadow: 0 0 30px rgba(255, 0, 51, 0.9);
+        }
+
+        /* Glass Cards */
+        .glass-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 35px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.65);
+            transition: 0.4s;
+        }
+
+        .glass-card:hover {
+            border-color: var(--secondary);
+            box-shadow: 0 0 28px rgba(0, 243, 255, 0.25);
+            transform: translateY(-5px);
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 35px;
+            display: inline-block;
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 10px;
+            width: fit-content;
+            text-shadow: 0 0 20px rgba(0, 0, 0, 0.9);
+        }
+
+        #about { align-items: flex-end; }
+        #about .glass-card { max-width: 660px; }
+
+        /* Skills Grid */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            width: 100%;
+        }
+
+        .skill-card { text-align: center; padding: 30px; }
+        .skill-card i {
+            font-size: 3.2rem;
+            color: var(--secondary);
+            margin-bottom: 18px;
+            text-shadow: 0 0 18px var(--secondary);
+        }
+        .skill-card h3 { margin-bottom: 12px; font-size: 1.3rem; }
+
+        /* Filter Tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid var(--border-glass);
+            color: #fff;
+            padding: 9px 22px;
+            border-radius: 20px;
+            font-family: 'Orbitron', sans-serif;
+            transition: 0.3s;
+        }
+
+        .tab-btn.active, .tab-btn:hover {
+            background: var(--primary);
+            color: #000;
+            font-weight: bold;
+            box-shadow: 0 0 18px var(--primary);
+        }
+
+        /* Projects Grid */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+            gap: 25px;
+            width: 100%;
+        }
+
+        .project-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+        }
+
+        .owner-badge {
+            font-size: 0.73rem;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-family: 'Orbitron', sans-serif;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .owner-gefrus {
+            background: rgba(255, 157, 0, 0.2);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .owner-offfactory {
+            background: rgba(0, 243, 255, 0.2);
+            color: var(--secondary);
+            border: 1px solid var(--secondary);
+        }
+
+        .project-card h3 { margin-bottom: 10px; font-size: 1.25rem; }
+        .project-card p { color: #ccc; font-size: 0.93rem; margin-bottom: 20px; flex-grow: 1; }
+
+        .project-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.12);
+            padding-top: 15px;
+        }
+
+        .lang-tag {
+            background: rgba(255, 204, 0, 0.15);
+            border: 1px solid var(--sun-gold);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(2, 2, 5, 0.85);
+            border-top: 1px solid var(--border-glass);
+            position: relative;
+            z-index: 1;
+        }
+
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 30px 0;
+        }
+
+        .social-icons a {
+            color: #fff;
+            font-size: 2.2rem;
+            transition: 0.3s;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .social-icons a span {
+            font-size: 0.8rem;
+            font-family: 'Orbitron', sans-serif;
+            color: #bbb;
+        }
+
+        .social-icons a:hover {
+            color: var(--primary);
+            transform: scale(1.15);
+            text-shadow: 0 0 15px var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.6rem; }
+            #loading-screen h1 { font-size: 2.1rem; }
+            nav { padding: 15px 20px; }
+            .nav-links { display: none; }
+            * { cursor: auto; }
+            canvas#cursor-canvas { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. INTERACTIVE LOADING SCREEN (ESCAPE THE BLACK HOLE) -->
+    <div id="loading-screen">
+        <div class="warning-box"><i class="fa-solid fa-triangle-exclamation"></i> GRAVITATIONAL PULL DETECTED: 9.8x10¹² G</div>
+        <h1>Escape The Singularity</h1>
+        <p>Move your mouse to fire your comet thrusters against the Black Hole's pull. Scroll down inside to jump to <strong>Star Wars Lightspeed</strong> and reach the <strong>Helios Sun System</strong>!</p>
+        <button class="enter-btn" id="start-journey-btn">
+            <i class="fa-solid fa-shuttle-space"></i> Engage Thrusters & Music
+        </button>
+    </div>
+
+    <!-- 2. 3D WEBGL CANVAS & 2D GRAVITY CURSOR CANVAS -->
+    <canvas id="bg"></canvas>
+    <canvas id="cursor-canvas"></canvas>
+
+    <!-- 3. LIVE FLIGHT TELEMETRY HUD -->
+    <div class="space-hud">
+        <div class="hud-sector" id="hud-sector">SECTOR 01 // GARGANTUA BLACK HOLE</div>
+        <div class="hud-sub" id="hud-telemetry">SCROLL TO ENGAGE HYPERDRIVE LIGHTSPEED</div>
+    </div>
+
+    <!-- 4. NAVIGATION -->
+    <nav>
+        <a href="#home" class="logo">
+            <i class="fa-solid fa-hurricane" style="color: var(--primary);"></i> CubeComet
+        </a>
+        <div class="nav-right">
+            <div class="nav-links">
+                <a href="#home">Black Hole</a>
+                <a href="#about">About</a>
+                <a href="#skills">Hyperspace</a>
+                <a href="#projects">Solar System</a>
+            </div>
+            <button class="music-btn" id="music-toggle">
+                <div class="eq-bars">
+                    <div class="eq-bar"></div>
+                    <div class="eq-bar"></div>
+                    <div class="eq-bar"></div>
+                </div>
+                <span id="music-label">Audio: OFF</span>
+            </button>
+        </div>
+    </nav>
+
+    <main>
+        <!-- HERO SECTION (BLACK HOLE ORBIT) -->
+        <section id="home" class="hero">
+            <div class="hero-badge"><i class="fa-solid fa-atom"></i> Event Horizon Orbit // CubeComet</div>
+            <h1>
+                I'm <span class="highlight-orange">gefrus112</span><br>
+                & <span class="highlight-cyan">offfactory</span>
+            </h1>
+            <p>
+                Game Developer, 3D Blender Artist, Software Coder, and WebGL Builder. Move your cursor to see it fight the Black Hole's gravity, or scroll down to jump to <strong>Lightspeed</strong>!
+            </p>
+            <div class="btn-group">
+                <a href="https://github.com/gefrus112" target="_blank" class="btn">
+                    <i class="fa-brands fa-github"></i> GitHub (gefrus112)
+                </a>
+                <a href="https://github.com/offfactory" target="_blank" class="btn btn-cyber">
+                    <i class="fa-brands fa-github"></i> GitHub (offfactory)
+                </a>
+                <a href="https://www.youtube.com/@CubeCometYT" target="_blank" class="btn btn-yt">
+                    <i class="fa-brands fa-youtube"></i> @CubeCometYT
+                </a>
+            </div>
+        </section>
+
+        <!-- ABOUT SECTION (ENTERING GRAVITY WELL) -->
+        <section id="about">
+            <div class="glass-card">
+                <h2 class="section-title">About My Universe</h2>
+                <p style="font-size: 1.05rem; line-height: 1.8; margin-bottom: 18px;">
+                    Welcome to my interactive 3D cosmos! I build video games, 3D Blender animations, and high-performance software across my two GitHub profiles: <strong>gefrus112</strong> and <strong>offfactory</strong>.
+                </p>
+                <p style="font-size: 1.05rem; line-height: 1.8;">
+                    Keep scrolling down to fire the <strong>Star Wars Hyperdrive</strong>—warping past the Black Hole at lightspeed straight toward a blazing Binary Sun!
+                </p>
+            </div>
+        </section>
+
+        <!-- SKILLS SECTION (STAR WARS HYPERSPACE CORRIDOR) -->
+        <section id="skills">
+            <h2 class="section-title" style="border-color: var(--secondary);">Hyperspace Arsenal (Skills)</h2>
+            <div class="skills-grid">
+                <div class="glass-card skill-card">
+                    <i class="fa-solid fa-gamepad"></i>
+                    <h3>Game Development</h3>
+                    <p>Creating 2D & 3D games, custom physics, shaders, particle systems, and high-octane gameplay mechanics.</p>
+                </div>
+                <div class="glass-card skill-card">
+                    <i class="fa-solid fa-cubes"></i>
+                    <h3>Blender 3D Art</h3>
+                    <p>3D modeling, sculpting, rigging, texturing, and cinematic animations for games and YouTube videos.</p>
+                </div>
+                <div class="glass-card skill-card">
+                    <i class="fa-solid fa-code"></i>
+                    <h3>Coding & Logic</h3>
+                    <p>Developing clean, fast software architectures, open-source tools, and experiments across multiple languages.</p>
+                </div>
+                <div class="glass-card skill-card">
+                    <i class="fa-solid fa-globe"></i>
+                    <h3>3D Website Building</h3>
+                    <p>Crafting next-gen interactive WebGL & Three.js websites with custom shaders, physics, and 3D animations.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- PROJECTS SECTION (ARRIVAL AT THE BLAZING SUN SYSTEM) -->
+        <section id="projects">
+            <h2 class="section-title">Solar System Repositories</h2>
+            <p style="margin-bottom: 20px; color: #ddd;">
+                Live projects orbiting the Helios Star—automatically synced from <strong>@gefrus112</strong> and <strong>@offfactory</strong>:
+            </p>
+            
+            <div class="filter-tabs">
+                <button class="tab-btn active" onclick="filterProjects('all', this)">All Repositories</button>
+                <button class="tab-btn" onclick="filterProjects('gefrus112', this)">gefrus112</button>
+                <button class="tab-btn" onclick="filterProjects('offfactory', this)">offfactory</button>
+            </div>
+
+            <div id="github-projects" class="projects-grid">
+                <div class="glass-card"><p>Warping repositories across hyperspace...</p></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer id="contact">
+        <h2>Join The CubeComet Fleet</h2>
+        <p style="color: #bbb; margin-top: 8px;">Check out my code repositories and subscribe on YouTube!</p>
+        <div class="social-icons">
+            <a href="https://github.com/gefrus112" target="_blank">
+                <i class="fa-brands fa-github"></i>
+                <span>gefrus112</span>
+            </a>
+            <a href="https://github.com/offfactory" target="_blank">
+                <i class="fa-brands fa-github" style="color: var(--secondary);"></i>
+                <span>offfactory</span>
+            </a>
+            <a href="https://www.youtube.com/@CubeCometYT" target="_blank">
+                <i class="fa-brands fa-youtube" style="color: #ff0033;"></i>
+                <span>@CubeCometYT</span>
+            </a>
+        </div>
+        <p style="font-size: 0.85rem; color: #777;">&copy; 2025 CubeComet (gefrus112 & offfactory). Built with Three.js & GLSL Shaders.</p>
+    </footer>
+
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        // =========================================================================
+        // 1. PROCEDURAL SPACE SYNTHESIZER MUSIC (Interstellar / Cosmic Pad)
+        // =========================================================================
+        let audioCtx = null;
+        let isMusicPlaying = false;
+        let masterGain = null;
+        let chordInterval = null;
+
+        function initAndPlaySpaceMusic() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+                masterGain = audioCtx.createGain();
+                masterGain.gain.value = 0.22;
+                masterGain.connect(audioCtx.destination);
+
+                // Deep Space Sub-Drone (Hans Zimmer Organ Bass feel)
+                const subOsc = audioCtx.createOscillator();
+                const subGain = audioCtx.createGain();
+                subOsc.type = 'sawtooth';
+                subOsc.frequency.value = 55; // A1 Deep Drone
+
+                const lowpass = audioCtx.createBiquadFilter();
+                lowpass.type = 'lowpass';
+                lowpass.frequency.value = 160;
+
+                subGain.gain.value = 0.4;
+                subOsc.connect(lowpass);
+                lowpass.connect(subGain);
+                subGain.connect(masterGain);
+                subOsc.start();
+
+                // Cosmic Shimmer Chords
+                const chords = [
+                    [220, 261.63, 329.63, 493.88], // Am9
+                    [174.61, 220, 261.63, 392.00], // Fmaj7
+                    [130.81, 196.00, 246.94, 329.63], // Cmaj7
+                    [146.83, 220.00, 293.66, 369.99]  // Dadd9
+                ];
+                let chordIdx = 0;
+
+                function playCosmicChord() {
+                    if (!isMusicPlaying) return;
+                    const now = audioCtx.currentTime;
+                    const freqs = chords[chordIdx];
+                    chordIdx = (chordIdx + 1) % chords.length;
+
+                    freqs.forEach((f, i) => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        const filter = audioCtx.createBiquadFilter();
+
+                        osc.type = i % 2 === 0 ? 'sine' : 'triangle';
+                        osc.frequency.value = f;
+
+                        filter.type = 'lowpass';
+                        filter.frequency.setValueAtTime(300, now);
+                        filter.frequency.exponentialRampToValueAtTime(1400, now + 2.5);
+                        filter.frequency.exponentialRampToValueAtTime(300, now + 5.5);
+
+                        gain.gain.setValueAtTime(0.001, now);
+                        gain.gain.linearRampToValueAtTime(0.12, now + 2.0);
+                        gain.gain.exponentialRampToValueAtTime(0.0001, now + 6.0);
+
+                        osc.connect(filter);
+                        filter.connect(gain);
+                        gain.connect(masterGain);
+
+                        osc.start(now);
+                        osc.stop(now + 6.1);
+                    });
+                }
+
+                isMusicPlaying = true;
+                playCosmicChord();
+                chordInterval = setInterval(playCosmicChord, 5200);
+            } else {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                isMusicPlaying = true;
+                masterGain.gain.setTargetAtTime(0.22, audioCtx.currentTime, 0.3);
+            }
+            updateMusicUI();
+        }
+
+        function toggleMusic() {
+            if (!audioCtx) {
+                initAndPlaySpaceMusic();
+                return;
+            }
+            if (isMusicPlaying) {
+                masterGain.gain.setTargetAtTime(0.0001, audioCtx.currentTime, 0.3);
+                isMusicPlaying = false;
+            } else {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                masterGain.gain.setTargetAtTime(0.22, audioCtx.currentTime, 0.3);
+                isMusicPlaying = true;
+            }
+            updateMusicUI();
+        }
+
+        function updateMusicUI() {
+            const btn = document.getElementById('music-toggle');
+            const label = document.getElementById('music-label');
+            if (isMusicPlaying) {
+                btn.classList.add('music-playing');
+                label.textContent = 'Space Synth: ON';
+            } else {
+                btn.classList.remove('music-playing');
+                label.textContent = 'Space Synth: OFF';
+            }
+        }
+
+        document.getElementById('music-toggle').addEventListener('click', toggleMusic);
+        document.getElementById('start-journey-btn').addEventListener('click', () => {
+            document.getElementById('loading-screen').classList.add('hidden');
+            initAndPlaySpaceMusic();
+        });
+
+        // =========================================================================
+        // 2. 2D MOUSE ANIMATION: "TRYING TO ESCAPE THE BLACK HOLE GRAVITY"
+        // =========================================================================
+        const cursorCanvas = document.getElementById('cursor-canvas');
+        const ctx = cursorCanvas.getContext('2d');
+        cursorCanvas.width = window.innerWidth;
+        cursorCanvas.height = window.innerHeight;
+
+        let mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+        const mouseParticles = [];
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+            // Spawn thruster particles trying to escape with the mouse
+            for (let i = 0; i < 3; i++) {
+                mouseParticles.push({
+                    x: mouse.x + (Math.random() - 0.5) * 10,
+                    y: mouse.y + (Math.random() - 0.5) * 10,
+                    vx: (Math.random() - 0.5) * 2.5,
+                    vy: (Math.random() - 0.5) * 2.5,
+                    size: Math.random() * 3.5 + 1.5,
+                    color: Math.random() > 0.4 ? '#00f3ff' : '#ff9d00',
+                    alpha: 1
+                });
+            }
+        });
+
+        // Project 3D Black Hole center onto 2D screen so mouse particles get sucked into it!
+        function getBlackHoleScreenPos(bhWorldPos, camera) {
+            const vector = bhWorldPos.clone();
+            vector.project(camera);
+            return {
+                x: (vector.x * 0.5 + 0.5) * window.innerWidth,
+                y: (-(vector.y * 0.5) + 0.5) * window.innerHeight
+            };
+        }
+
+        // =========================================================================
+        // 3. GITHUB API (BOTH gefrus112 & offfactory)
+        // =========================================================================
+        let allRepos = [];
+        async function fetchAllGitHubProjects() {
+            const container = document.getElementById('github-projects');
+            try {
+                const [res1, res2] = await Promise.all([
+                    fetch('https://api.github.com/users/gefrus112/repos?sort=updated&per_page=20'),
+                    fetch('https://api.github.com/users/offfactory/repos?sort=updated&per_page=20')
+                ]);
+                const repos1 = res1.ok ? await res1.json() : [];
+                const repos2 = res2.ok ? await res2.json() : [];
+                allRepos = [...repos1, ...repos2].sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+                renderProjects(allRepos);
+            } catch (e) {
+                container.innerHTML = `
+                    <div class="glass-card">
+                        <h3>@gefrus112</h3>
+                        <p>Explore my main game development and coding repositories on GitHub.</p><br>
+                        <a href="https://github.com/gefrus112" target="_blank" class="btn">Visit gefrus112</a>
+                    </div>
+                    <div class="glass-card">
+                        <h3>@offfactory</h3>
+                        <p>Explore my second GitHub profile for more tools and projects.</p><br>
+                        <a href="https://github.com/offfactory" target="_blank" class="btn btn-cyber">Visit offfactory</a>
+                    </div>`;
+            }
+        }
+
+        function renderProjects(repos) {
+            const container = document.getElementById('github-projects');
+            container.innerHTML = '';
+            if (!repos || repos.length === 0) {
+                container.innerHTML = `<div class="glass-card"><p>No public repositories found in this sector yet!</p></div>`;
+                return;
+            }
+            repos.forEach(repo => {
+                const owner = repo.owner.login.toLowerCase();
+                const badgeClass = owner === 'gefrus112' ? 'owner-gefrus' : 'owner-offfactory';
+                const desc = repo.description ? repo.description : `Project repository built by @${repo.owner.login}.`;
+                const lang = repo.language ? repo.language : 'Code';
+
+                const card = document.createElement('div');
+                card.className = 'glass-card project-card';
+                card.innerHTML = `
+                    <div>
+                        <span class="owner-badge ${badgeClass}"><i class="fa-brands fa-github"></i> ${repo.owner.login}</span>
+                        <h3>${repo.name}</h3>
+                        <p>${desc}</p>
+                    </div>
+                    <div class="project-meta">
+                        <span class="lang-tag">${lang}</span>
+                        <a href="${repo.html_url}" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: bold;">
+                            Launch Repo <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        </a>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        window.filterProjects = function(ownerFilter, btnElement) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+            if (ownerFilter === 'all') renderProjects(allRepos);
+            else renderProjects(allRepos.filter(r => r.owner.login.toLowerCase() === ownerFilter.toLowerCase()));
+        };
+        fetchAllGitHubProjects();
+
+        // =========================================================================
+        // 4. THREE.JS SCENE: BLACK HOLE -> HYPERSPACE -> BLAZING SUN
+        // =========================================================================
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 3000);
+        const renderer = new THREE.WebGLRenderer({
+            canvas: document.querySelector('#bg'),
+            antialias: true
+        });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        // Soft Glow Texture Generator
+        function createGlowTexture() {
+            const c = document.createElement('canvas');
+            c.width = 64; c.height = 64;
+            const context = c.getContext('2d');
+            const grad = context.createRadialGradient(32, 32, 0, 32, 32, 32);
+            grad.addColorStop(0, 'rgba(255,255,255,1)');
+            grad.addColorStop(0.35, 'rgba(255,200,120,0.8)');
+            grad.addColorStop(0.7, 'rgba(255,90,0,0.25)');
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
+            context.fillStyle = grad;
+            context.fillRect(0, 0, 64, 64);
+            return new THREE.CanvasTexture(c);
+        }
+        const glowTex = createGlowTexture();
+
+        // -------------------------------------------------------------------------
+        // A. SECTOR 01: ULTRA-REALISTIC SHADER BLACK HOLE (Z = 0)
+        // -------------------------------------------------------------------------
+        const blackHoleGroup = new THREE.Group();
+        blackHoleGroup.position.set(10, 1, 0);
+        blackHoleGroup.rotation.z = -0.24;
+        blackHoleGroup.rotation.x = 0.22;
+        scene.add(blackHoleGroup);
+
+        // 1. Pitch-Black Event Horizon Sphere
+        const ehGeo = new THREE.SphereGeometry(6.8, 64, 64);
+        const ehMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const eventHorizon = new THREE.Mesh(ehGeo, ehMat);
+        blackHoleGroup.add(eventHorizon);
+
+        // 2. Custom GLSL Shader Accretion Disk (Boiling Relativistic Plasma)
+        const diskShaderMat = new THREE.ShaderMaterial({
+            uniforms: { uTime: { value: 0 } },
+            vertexShader: `
+                varying vec2 vUv;
+                varying vec3 vPos;
+                void main() {
+                    vUv = uv;
+                    vPos = position;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform float uTime;
+                varying vec2 vUv;
+                varying vec3 vPos;
+
+                // Procedural cosmic noise
+                float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }
+                float noise(vec2 p) {
+                    vec2 i = floor(p); vec2 f = fract(p);
+                    vec2 u = f*f*(3.0-2.0*f);
+                    return mix(mix(hash(i + vec2(0.0,0.0)), hash(i + vec2(1.0,0.0)), u.x),
+                               mix(hash(i + vec2(0.0,1.0)), hash(i + vec2(1.0,1.0)), u.x), u.y);
+                }
+
+                void main() {
+                    float dist = length(vPos.xy);
+                    if (dist < 6.9 || dist > 26.0) discard;
+
+                    float normDist = (dist - 6.9) / (26.0 - 6.9);
+                    float angle = atan(vPos.y, vPos.x);
+
+                    // Differential spiral swirl
+                    float spiral = noise(vec2(dist * 0.6 - uTime * 1.5, angle * 3.0 + uTime * (12.0 / dist)));
+                    float rings = sin(dist * 2.5 - uTime * 4.0) * 0.5 + 0.5;
+                    float intensity = mix(spiral, rings, 0.45) * pow(1.0 - normDist, 1.5) * 1.8;
+
+                    // Relativistic Doppler beaming (left side brighter than right side)
+                    float doppler = 1.0 + 0.35 * cos(angle + 0.8);
+                    intensity *= doppler;
+
+                    vec3 hotWhite = vec3(1.0, 0.97, 0.88);
+                    vec3 fieryOrange = vec3(1.0, 0.48, 0.05);
+                    vec3 deepRed = vec3(0.55, 0.05, 0.2);
+
+                    vec3 col = mix(hotWhite, fieryOrange, smoothstep(0.0, 0.35, normDist));
+                    col = mix(col, deepRed, smoothstep(0.35, 1.0, normDist));
+
+                    float alpha = smoothstep(6.9, 7.6, dist) * (1.0 - smoothstep(18.0, 26.0, dist)) * intensity;
+                    gl_FragColor = vec4(col * 1.4, clamp(alpha, 0.0, 0.95));
+                }
+            `,
+            side: THREE.DoubleSide,
+            transparent: true,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending
+        });
+
+        const shaderDiskGeo = new THREE.PlaneGeometry(55, 55, 1, 1);
+        const shaderDisk = new THREE.Mesh(shaderDiskGeo, diskShaderMat);
+        shaderDisk.rotation.x = Math.PI / 2;
+        blackHoleGroup.add(shaderDisk);
+
+        // 3. Gravitational Lensing Arch (Bent Light Over & Under the Singularity)
+        const lensedArchMesh = new THREE.Mesh(
+            new THREE.PlaneGeometry(36, 36),
+            diskShaderMat
+        );
+        blackHoleGroup.add(lensedArchMesh);
+
+        // 4. 14,000 Swirling Accretion Sparks
+        const sparkCount = 14000;
+        const sparkGeo = new THREE.BufferGeometry();
+        const sparkPos = new Float32Array(sparkCount * 3);
+        const sparkCols = new Float32Array(sparkCount * 3);
+        const sparkAngles = new Float32Array(sparkCount);
+        const sparkRadii = new Float32Array(sparkCount);
+        const sparkSpeeds = new Float32Array(sparkCount);
+
+        for (let i = 0; i < sparkCount; i++) {
+            const t = Math.pow(Math.random(), 1.5);
+            const r = 7.0 + t * 22.0;
+            const a = Math.random() * Math.PI * 2;
+            sparkRadii[i] = r;
+            sparkAngles[i] = a;
+            sparkSpeeds[i] = (1 / Math.pow(r, 1.15)) * 20;
+
+            sparkPos[i * 3] = Math.cos(a) * r;
+            sparkPos[i * 3 + 1] = (Math.random() - 0.5) * (0.3 + t * 1.5);
+            sparkPos[i * 3 + 2] = Math.sin(a) * r;
+
+            const c = new THREE.Color().setHSL(0.08 - t * 0.07, 1.0, 0.9 - t * 0.5);
+            sparkCols[i * 3] = c.r;
+            sparkCols[i * 3 + 1] = c.g;
+            sparkCols[i * 3 + 2] = c.b;
+        }
+        sparkGeo.setAttribute('position', new THREE.BufferAttribute(sparkPos, 3));
+        sparkGeo.setAttribute('color', new THREE.BufferAttribute(sparkCols, 3));
+        const sparkMat = new THREE.PointsMaterial({
+            size: 0.42, map: glowTex, vertexColors: true,
+            transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
+        });
+        const accretionSparks = new THREE.Points(sparkGeo, sparkMat);
+        blackHoleGroup.add(accretionSparks);
+
+        // -------------------------------------------------------------------------
+        // B. SECTOR 02: STAR WARS HYPERSPACE LIGHTSPEED STREAKS
+        // -------------------------------------------------------------------------
+        const warpStarCount = 2200;
+        const warpGeo = new THREE.BufferGeometry();
+        // Each star is a LineSegment (2 vertices = 6 floats) so we can stretch it into lightspeed lines!
+        const warpPositions = new Float32Array(warpStarCount * 6);
+        const warpColors = new Float32Array(warpStarCount * 6);
+        const warpBaseData = [];
+
+        for (let i = 0; i < warpStarCount; i++) {
+            // Cylindrical tunnel around the camera flight path
+            const radius = 8 + Math.random() * 140;
+            const angle = Math.random() * Math.PI * 2;
+            const x = Math.cos(angle) * radius;
+            const y = Math.sin(angle) * radius;
+            const z = (Math.random() - 0.5) * 600 - 150;
+
+            warpBaseData.push({ x, y, z, speed: 1.5 + Math.random() * 2.5 });
+
+            // Start & End vertex
+            warpPositions[i * 6] = x;
+            warpPositions[i * 6 + 1] = y;
+            warpPositions[i * 6 + 2] = z;
+            warpPositions[i * 6 + 3] = x;
+            warpPositions[i * 6 + 4] = y;
+            warpPositions[i * 6 + 5] = z - 0.4;
+
+            // Star Wars Hyperspace Cyan / White palette
+            const isCyan = Math.random() > 0.35;
+            const rCol = isCyan ? 0.3 : 1.0;
+            const gCol = isCyan ? 0.92 : 1.0;
+            const bCol = 1.0;
+
+            warpColors[i * 6] = 1.0; warpColors[i * 6 + 1] = 1.0; warpColors[i * 6 + 2] = 1.0;
+            warpColors[i * 6 + 3] = rCol; warpColors[i * 6 + 4] = gCol; warpColors[i * 6 + 5] = bCol;
+        }
+
+        warpGeo.setAttribute('position', new THREE.BufferAttribute(warpPositions, 3));
+        warpGeo.setAttribute('color', new THREE.BufferAttribute(warpColors, 3));
+        const warpMat = new THREE.LineBasicMaterial({
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.85,
+            blending: THREE.AdditiveBlending
+        });
+        const hyperspaceLines = new THREE.LineSegments(warpGeo, warpMat);
+        scene.add(hyperspaceLines);
+
+        // -------------------------------------------------------------------------
+        // C. SECTOR 03: THE BLAZING HELIOS BINARY SUN SYSTEM (Z = -260)
+        // -------------------------------------------------------------------------
+        const sunGroup = new THREE.Group();
+        sunGroup.position.set(12, 2, -260);
+        scene.add(sunGroup);
+
+        // 1. Animated Solar Plasma GLSL Shader Sphere
+        const sunShaderMat = new THREE.ShaderMaterial({
+            uniforms: { uTime: { value: 0 } },
+            vertexShader: `
+                varying vec3 vNormal;
+                varying vec3 vPos;
+                void main() {
+                    vNormal = normalize(normalMatrix * normal);
+                    vPos = position;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform float uTime;
+                varying vec3 vNormal;
+                varying vec3 vPos;
+
+                float hash(vec3 p) { return fract(sin(dot(p, vec3(127.1, 311.7, 74.7))) * 43758.5453); }
+                float noise(vec3 p) {
+                    vec3 i = floor(p); vec3 f = fract(p);
+                    f = f*f*(3.0-2.0*f);
+                    return mix(
+                        mix(mix(hash(i+vec3(0,0,0)), hash(i+vec3(1,0,0)), f.x),
+                            mix(hash(i+vec3(0,1,0)), hash(i+vec3(1,1,0)), f.x), f.y),
+                        mix(mix(hash(i+vec3(0,0,1)), hash(i+vec3(1,0,1)), f.x),
+                            mix(hash(i+vec3(0,1,1)), hash(i+vec3(1,1,1)), f.x), f.y), f.z);
+                }
+
+                void main() {
+                    vec3 p = vPos * 0.25 + vec3(uTime * 0.25);
+                    float n = noise(p) * 0.6 + noise(p * 2.5 - uTime * 0.4) * 0.4;
+
+                    // Limb darkening / Corona fresnel
+                    float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0))), 1.8);
+
+                    vec3 coreYellow = vec3(1.0, 0.95, 0.6);
+                    vec3 plasmaOrange = vec3(1.0, 0.42, 0.0);
+                    vec3 sunSpotRed = vec3(0.7, 0.1, 0.0);
+
+                    vec3 col = mix(sunSpotRed, plasmaOrange, smoothstep(0.2, 0.55, n));
+                    col = mix(col, coreYellow, smoothstep(0.55, 0.85, n));
+                    col += vec3(1.0, 0.6, 0.2) * fresnel * 1.4;
+
+                    gl_FragColor = vec4(col, 1.0);
+                }
+            `
+        });
+
+        const mainSun = new THREE.Mesh(new THREE.SphereGeometry(13, 64, 64), sunShaderMat);
+        sunGroup.add(mainSun);
+
+        // 2. Blazing Solar Corona Atmosphere Glow
+        const coronaGeo = new THREE.RingGeometry(12.8, 25, 64);
+        const coronaMat = new THREE.ShaderMaterial({
+            uniforms: { uTime: { value: 0 } },
+            vertexShader: `
+                varying vec2 vUv;
+                varying vec3 vPos;
+                void main() {
+                    vUv = uv;
+                    vPos = position;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform float uTime;
+                varying vec3 vPos;
+                void main() {
+                    float d = length(vPos.xy);
+                    float norm = clamp((d - 12.8) / (25.0 - 12.8), 0.0, 1.0);
+                    float angle = atan(vPos.y, vPos.x);
+                    float rays = sin(angle * 16.0 + uTime * 2.0) * 0.12 + sin(angle * 7.0 - uTime * 1.5) * 0.15;
+                    float glow = pow(1.0 - norm, 2.2) + rays * (1.0 - norm);
+                    vec3 col = mix(vec3(1.0, 0.85, 0.4), vec3(1.0, 0.25, 0.0), norm);
+                    gl_FragColor = vec4(col, clamp(glow, 0.0, 0.85));
+                }
+            `,
+            transparent: true,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending,
+            side: THREE.DoubleSide
+        });
+        const sunCorona = new THREE.Mesh(coronaGeo, coronaMat);
+        sunGroup.add(sunCorona);
+
+        // 3. Binary Companion Star (Tatooine / Star Wars Twin Sun vibe!)
+        const companionSun = new THREE.Mesh(
+            new THREE.SphereGeometry(4.5, 32, 32),
+            new THREE.MeshBasicMaterial({ color: 0xaaddff })
+        );
+        companionSun.position.set(-24, 10, -15);
+        sunGroup.add(companionSun);
+
+        // =========================================================================
+        // 5. ANIMATION LOOP: SCROLL ODYSSEY + GRAVITY MOUSE ESCAPE
+        // =========================================================================
+        let scrollPercent = 0;
+        let scrollVelocity = 0;
+        let lastScrollY = window.scrollY;
+
+        window.addEventListener('scroll', () => {
+            const maxScroll = Math.max(1, document.body.scrollHeight - window.innerHeight);
+            scrollPercent = window.scrollY / maxScroll;
+            scrollVelocity = Math.abs(window.scrollY - lastScrollY);
+            lastScrollY = window.scrollY;
+        });
+
+        const clock = new THREE.Clock();
+        const hudSector = document.getElementById('hud-sector');
+        const hudTelemetry = document.getElementById('hud-telemetry');
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsedTime = clock.getElapsedTime();
+
+            // Decay scroll velocity smoothly
+            scrollVelocity *= 0.92;
+
+            // Update Shaders
+            diskShaderMat.uniforms.uTime.value = elapsedTime;
+            sunShaderMat.uniforms.uTime.value = elapsedTime;
+            coronaMat.uniforms.uTime.value = elapsedTime;
+
+            // 1. Swirl Black Hole Accretion Sparks
+            const sPos = accretionSparks.geometry.attributes.position.array;
+            for (let i = 0; i < sparkCount; i++) {
+                sparkAngles[i] += sparkSpeeds[i] * 0.015;
+                const r = sparkRadii[i];
+                sPos[i * 3] = Math.cos(sparkAngles[i]) * r;
+                sPos[i * 3 + 2] = Math.sin(sparkAngles[i]) * r;
+            }
+            accretionSparks.geometry.attributes.position.needsUpdate = true;
+            lensedArchMesh.lookAt(camera.position);
+
+            // 2. Rotate Binary Sun System
+            mainSun.rotation.y = elapsedTime * 0.15;
+            sunCorona.lookAt(camera.position);
+            companionSun.position.x = Math.cos(elapsedTime * 0.5) * 26;
+            companionSun.position.z = Math.sin(elapsedTime * 0.5) * 26;
+
+            // 3. CALCULATE CAMERA JOURNEY (Black Hole -> Hyperspace -> Sun)
+            // Z travels from +38 (Black Hole) down to -220 (Orbiting the Sun)
+            const targetZ = 38 - (scrollPercent * 258);
+            camera.position.z += (targetZ - camera.position.z) * 0.07;
+
+            // Mouse parallax on camera
+            const normMouseX = (mouse.x / window.innerWidth) - 0.5;
+            const normMouseY = (mouse.y / window.innerHeight) - 0.5;
+            camera.position.x += (normMouseX * 10 - camera.position.x) * 0.05;
+            camera.position.y += (-normMouseY * 8 + 3 - camera.position.y) * 0.05;
+
+            // 4. STAR WARS HYPERSPACE WARP FACTOR
+            // Peaks in the middle of the page (30% to 75% scroll) OR when scrolling fast
+            const inHyperspaceZone = Math.sin(Math.min(1, Math.max(0, (scrollPercent - 0.18) / 0.62)) * Math.PI);
+            const warpFactor = Math.max(inHyperspaceZone * 38, Math.min(scrollVelocity * 0.8, 45));
+
+            // Dynamic FOV Warp for Star Wars speed effect
+            camera.fov = 65 + warpFactor * 0.65;
+            camera.updateProjectionMatrix();
+
+            // Update HUD Telemetry based on Sector
+            if (scrollPercent < 0.28) {
+                hudSector.textContent = 'SECTOR 01 // GARGANTUA BLACK HOLE';
+                hudSector.style.color = '#ff9d00';
+                hudTelemetry.textContent = 'STATUS: FIGHTING SINGULARITY GRAVITY WELL';
+            } else if (scrollPercent < 0.72) {
+                hudSector.textContent = 'SECTOR 02 // STAR WARS HYPERSPACE CORRIDOR';
+                hudSector.style.color = '#00f3ff';
+                hudTelemetry.textContent = `WARP SPEED: ${(warpFactor * 0.4 + 1.2).toFixed(1)}x LIGHTSPEED`;
+            } else {
+                hudSector.textContent = 'SECTOR 03 // HELIOS BINARY SUN SYSTEM';
+                hudSector.style.color = '#ffcc00';
+                hudTelemetry.textContent = 'SOLAR CORONA ORBIT ESTABLISHED // REPOSITORIES ONLINE';
+            }
+
+            // Stretch & Rush the Hyperspace Star Lines
+            const wPos = hyperspaceLines.geometry.attributes.position.array;
+            const streakLength = 0.4 + warpFactor * 2.4;
+            const flySpeed = 0.25 + warpFactor * 0.45;
+
+            for (let i = 0; i < warpStarCount; i++) {
+                const star = warpBaseData[i];
+                star.z += flySpeed * star.speed;
+
+                // Wrap stars around camera so the tunnel never ends
+                if (star.z > camera.position.z + 40) {
+                    star.z = camera.position.z - 350;
+                } else if (star.z < camera.position.z - 360) {
+                    star.z = camera.position.z + 30;
+                }
+
+                // Front tip of star streak
+                wPos[i * 6] = star.x;
+                wPos[i * 6 + 1] = star.y;
+                wPos[i * 6 + 2] = star.z;
+
+                // Rear tail of star streak (stretches into lightspeed lines!)
+                wPos[i * 6 + 3] = star.x;
+                wPos[i * 6 + 4] = star.y;
+                wPos[i * 6 + 5] = star.z - streakLength;
+            }
+            hyperspaceLines.geometry.attributes.position.needsUpdate = true;
+
+            renderer.render(scene, camera);
+
+            // =====================================================================
+            // 6. RENDER 2D GRAVITY CURSOR ("ESCAPING THE BLACK HOLE")
+            // =====================================================================
+            ctx.clearRect(0, 0, cursorCanvas.width, cursorCanvas.height);
+
+            // Find where the Black Hole (or Sun in Sector 3) is on screen
+            const gravitySourceWorld = scrollPercent < 0.65 ? blackHoleGroup.position : sunGroup.position;
+            const bhScreen = getBlackHoleScreenPos(gravitySourceWorld, camera);
+
+            // Draw subtle gravitational tether line between cursor & singularity
+            const dxToBH = bhScreen.x - mouse.x;
+            const dyToBH = bhScreen.y - mouse.y;
+            const distToBH = Math.hypot(dxToBH, dyToBH);
+
+            ctx.beginPath();
+            ctx.moveTo(mouse.x, mouse.y);
+            ctx.lineTo(mouse.x + (dxToBH / distToBH) * 28, mouse.y + (dyToBH / distToBH) * 28);
+            ctx.strokeStyle = 'rgba(255, 157, 0, 0.45)';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            // Draw Custom Spacecraft/Comet Cursor Ring
+            ctx.beginPath();
+            ctx.arc(mouse.x, mouse.y, 9, 0, Math.PI * 2);
+            ctx.strokeStyle = '#00f3ff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Update & Draw Thruster Particles getting sucked into the Black Hole!
+            for (let i = mouseParticles.length - 1; i >= 0; i--) {
+                const p = mouseParticles[i];
+                const dx = bhScreen.x - p.x;
+                const dy = bhScreen.y - p.y;
+                const dist = Math.max(15, Math.hypot(dx, dy));
+
+                // Gravitational acceleration pulling particles into the Black Hole center
+                const pullStrength = 180 / (dist * 0.65);
+                p.vx += (dx / dist) * pullStrength * 0.15;
+                p.vy += (dy / dist) * pullStrength * 0.15;
+
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= 0.016;
+
+                if (p.alpha <= 0 || dist < 18) {
+                    mouseParticles.splice(i, 1);
+                    continue;
+                }
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.alpha;
+                ctx.fill();
+                ctx.globalAlpha = 1.0;
+            }
+        }
+
+        animate();
+
+        // Handle Window Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            cursorCanvas.width = window.innerWidth;
+            cursorCanvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
+```
